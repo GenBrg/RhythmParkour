@@ -31,8 +31,8 @@ Load< Scene > rhythm_parkour_scene(LoadTagDefault, []() -> Scene const * {
 	});
 });
 
-Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("dusty-floor.opus"));
+Load< Sound::Sample > rhythm_parkour_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("rhythm_parkour.wav"));
 });
 
 PlayMode::PlayMode() : scene(*rhythm_parkour_scene) {
@@ -56,7 +56,7 @@ PlayMode::PlayMode() : scene(*rhythm_parkour_scene) {
 
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	// leg_tip_loop = Sound::loop_3D(*dusty_floor_sample, 1.0f, get_leg_tip_position(), 10.0f);
+	background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
 }
 
 PlayMode::~PlayMode() {
@@ -125,8 +125,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 void PlayMode::update(float elapsed) {
 
 	//slowly rotates through [0,1):
-	wobble += elapsed / 10.0f;
-	wobble -= std::floor(wobble);
+	// wobble += elapsed / 10.0f;
+	// wobble -= std::floor(wobble);
 
 	// hip->rotation = hip_base_rotation * glm::angleAxis(
 	// 	glm::radians(5.0f * std::sin(wobble * 2.0f * float(M_PI))),
@@ -195,7 +195,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	GL_ERRORS();
 	glUseProgram(0);
 
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(0.4f, 0.9f, 0.9f, 1.0f);
 	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -225,9 +225,4 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
 	}
-}
-
-glm::vec3 PlayMode::get_leg_tip_position() {
-	//the vertex position here was read from the model in blender:
-	return lower_leg->make_local_to_world() * glm::vec4(-1.26137f, -11.861f, 0.0f, 1.0f);
 }
