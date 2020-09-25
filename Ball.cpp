@@ -7,7 +7,6 @@
 
 extern Load< MeshBuffer > rhythm_parkour_meshes;
 
-// static constexpr float kRotationSpeed = glm::radians(3);
 static constexpr float kGravity = -500.0f;
 
 static constexpr float kBPM = 120.0f;
@@ -50,7 +49,7 @@ void Ball::SetStatus(Status status)
 void Ball::Animate(float elapsed)
 {
     // Rolling
-    
+    rotation_transform_.rotation *= glm::angleAxis(kRollingRotationSpeed * elapsed, glm::vec3(-1.0f, 0.0f, 0.0f));
 
     if (status_ == Status::JUMPING) {
         float& z = translation_transform_.position[2];
