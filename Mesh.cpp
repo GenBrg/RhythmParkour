@@ -107,9 +107,9 @@ const Mesh &MeshBuffer::lookup(std::string const &name) const {
 	return f->second;
 }
 
-GLuint MeshBuffer::make_vao_for_program(GLuint program) const {
+GLuint MeshBuffer::make_vao_for_program(GLuint program) {
 	//create a new vertex array object:
-	GLuint vao = 0;
+	vao = 0;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 

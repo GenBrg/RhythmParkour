@@ -80,16 +80,22 @@ glm::mat4 Scene::Camera::make_projection() const {
 //-------------------------
 
 
-void Scene::draw(Camera const &camera) const {
+void Scene::draw(Camera const &camera) {
 	assert(camera.transform);
 	glm::mat4 world_to_clip = camera.make_projection() * glm::mat4(camera.transform->make_world_to_local());
 	glm::mat4x3 world_to_light = glm::mat4x3(1.0f);
 	draw(world_to_clip, world_to_light);
 }
 
-void Scene::draw(glm::mat4 const &world_to_clip, glm::mat4x3 const &world_to_light) const {
+void Scene::draw(glm::mat4 const &world_to_clip, glm::mat4x3 const &world_to_light) {
 
 	//Iterate through all drawables, sending each one to OpenGL:
+	for (const auto &drawable : dynamic_drawables) {
+		drawable.Draw(world_to_clip, world_to_light);
+	}
+
+	dynamic_drawables.clear();
+
 	for (auto const &drawable : drawables) {
 		drawable.Draw(world_to_clip, world_to_light);
 	}
@@ -315,10 +321,14 @@ void Scene::Drawable::Draw(glm::mat4 const &world_to_clip, glm::mat4x3 const &wo
 {
 	//skip any drawables without a shader program set:
 	if (pipeline.program == 0) return;
+	
 	//skip any drawables that don't reference any vertex array:
 	if (pipeline.mesh->mesh_buffer->vao == 0) return;
+	
 	//skip any drawables that don't contain any vertices:
 	if (pipeline.mesh->count == 0) return;
+
+	
 
 	//Set shader program:
 	glUseProgram(pipeline.program);

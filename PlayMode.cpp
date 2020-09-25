@@ -13,7 +13,7 @@
 #include <random>
 
 Load< MeshBuffer > rhythm_parkour_meshes(LoadTagDefault, []() -> MeshBuffer const * {
-	MeshBuffer const *ret = new MeshBuffer(data_path("rhythm_parkour.pnct"));
+	MeshBuffer *ret = new MeshBuffer(data_path("rhythm_parkour.pnct"));
 	ret->make_vao_for_program(lit_color_texture_program->program);
 	return ret;
 });
@@ -35,20 +35,10 @@ Load< Sound::Sample > rhythm_parkour_sample(LoadTagDefault, []() -> Sound::Sampl
 	return new Sound::Sample(data_path("rhythm_parkour.wav"));
 });
 
-PlayMode::PlayMode() : scene(*rhythm_parkour_scene) {
-	//get pointers to leg for convenience:
-	// for (auto &transform : scene.transforms) {
-	// 	if (transform.name == "Hip.FL") hip = &transform;
-	// 	else if (transform.name == "UpperLeg.FL") upper_leg = &transform;
-	// 	else if (transform.name == "LowerLeg.FL") lower_leg = &transform;
-	// }
-	// if (hip == nullptr) throw std::runtime_error("Hip not found.");
-	// if (upper_leg == nullptr) throw std::runtime_error("Upper leg not found.");
-	// if (lower_leg == nullptr) throw std::runtime_error("Lower leg not found.");
-
-	// hip_base_rotation = hip->rotation;
-	// upper_leg_base_rotation = upper_leg->rotation;
-	// lower_leg_base_rotation = lower_leg->rotation;
+PlayMode::PlayMode() : 
+scene(*rhythm_parkour_scene)
+{
+	ball = new Ball(this);
 
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
@@ -56,10 +46,11 @@ PlayMode::PlayMode() : scene(*rhythm_parkour_scene) {
 
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
+	// background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
 }
 
 PlayMode::~PlayMode() {
+	delete ball;
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -123,26 +114,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 }
 
 void PlayMode::update(float elapsed) {
-
-	//slowly rotates through [0,1):
-	// wobble += elapsed / 10.0f;
-	// wobble -= std::floor(wobble);
-
-	// hip->rotation = hip_base_rotation * glm::angleAxis(
-	// 	glm::radians(5.0f * std::sin(wobble * 2.0f * float(M_PI))),
-	// 	glm::vec3(0.0f, 1.0f, 0.0f)
-	// );
-	// upper_leg->rotation = upper_leg_base_rotation * glm::angleAxis(
-	// 	glm::radians(7.0f * std::sin(wobble * 2.0f * 2.0f * float(M_PI))),
-	// 	glm::vec3(0.0f, 0.0f, 1.0f)
-	// );
-	// lower_leg->rotation = lower_leg_base_rotation * glm::angleAxis(
-	// 	glm::radians(10.0f * std::sin(wobble * 3.0f * 2.0f * float(M_PI))),
-	// 	glm::vec3(0.0f, 0.0f, 1.0f)
-	// );
-
-	//move sound to follow leg tip position:
-	// leg_tip_loop->set_position(get_leg_tip_position(), 1.0f / 60.0f);
+	timer_manager.Update();
 
 	//move camera:
 	{
@@ -202,6 +174,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
+	scene.dynamic_drawables.emplace_back(ball->GetDrawable());
 	scene.draw(*camera);
 
 	{ //use DrawLines to overlay some text:

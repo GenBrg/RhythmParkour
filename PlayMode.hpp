@@ -2,6 +2,8 @@
 
 #include "Scene.hpp"
 #include "Sound.hpp"
+#include "Ball.hpp"
+#include "Timer.hpp"
 
 #include <glm/glm.hpp>
 
@@ -27,6 +29,10 @@ struct PlayMode : Mode {
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
+
+	Ball* ball;
+
+	TimerManager timer_manager;
 
 	//music coming from the tip of the leg (as a demonstration):
 	std::shared_ptr< Sound::PlayingSample > background_music;
