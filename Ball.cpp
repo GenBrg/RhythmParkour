@@ -3,10 +3,21 @@
 #include "Load.hpp"
 #include "LitColorTextureProgram.hpp"
 
+#include <iostream>
+
 extern Load< MeshBuffer > rhythm_parkour_meshes;
 
 // static constexpr float kRotationSpeed = glm::radians(3);
-static constexpr float kGravity = -9.8f;
+static constexpr float kGravity = -500.0f;
+
+static constexpr float kBPM = 120.0f;
+static constexpr float kBeatInterval = 60.0f / kBPM;
+static constexpr float kBeatPerPlatform = 1.0f / 6.0f;
+static constexpr float kPlatformUnitLen = 2.0f;
+static constexpr float kRollingTranslationSpeed = kPlatformUnitLen / (kBeatInterval * kBeatPerPlatform);
+static constexpr float kRollingRotationSpeed = kRollingTranslationSpeed / Ball::kNormalRadius;
+
+static constexpr float kJumpInitialSpeed = kPlatformUnitLen * (-kGravity) / (kRollingTranslationSpeed);
 
 Ball::Ball(PlayMode* playmode) : 
 drawable_(&rotation_transform_),
@@ -23,12 +34,14 @@ void Ball::SetStatus(Status status)
     if (status_ == Status::ROLLING) {
         status_ = status;
         if (status_ == Status::JUMPING) {
-            verticle_speed_ = 20.0f;
+            verticle_speed_ = kJumpInitialSpeed;
         } else if (status_ == Status::CROUCHING) {
             translation_transform_.position[2] = kCrouchRadius - kNormalRadius;
-            playmode_->timer_manager.AddTimer(500, [&]() {
+            drawable_.pipeline.mesh = &(rhythm_parkour_meshes->lookup("PlayerCrouch"));
+            playmode_->timer_manager.AddTimer(static_cast<long long>(1000.0f * (2 * kBeatInterval * kBeatPerPlatform)), [&]() {
                 status_ = Status::ROLLING;
                 translation_transform_.position[2] = 0;
+                drawable_.pipeline.mesh = &(rhythm_parkour_meshes->lookup("Player"));
             });
         }
     }

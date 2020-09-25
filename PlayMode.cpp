@@ -46,7 +46,7 @@ scene(*rhythm_parkour_scene)
 
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	// background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
+	background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
 }
 
 PlayMode::~PlayMode() {
@@ -71,9 +71,19 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			up.downs += 1;
 			up.pressed = true;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.downs += 1;
-			down.pressed = true;
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+			if (!jump.pressed) {
+				jump_triggered = true;
+			}
+			jump.downs += 1;
+			jump.pressed = true;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_LCTRL) {
+			if (!crouch.pressed) {
+				crouch_triggered = true;
+			}
+			crouch.downs += 1;
+			crouch.pressed = true;
 			return true;
 		}
 	} else if (evt.type == SDL_KEYUP) {
@@ -88,6 +98,12 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_s) {
 			down.pressed = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+			jump.pressed = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_LCTRL) {
+			crouch.pressed = false;
 			return true;
 		}
 	} else if (evt.type == SDL_MOUSEBUTTONDOWN) {
@@ -144,6 +160,18 @@ void PlayMode::update(float elapsed) {
 		glm::vec3 at = frame[3];
 		Sound::listener.set_position_right(at, right, 1.0f / 60.0f);
 	}
+
+	if (jump_triggered) {
+		ball->SetStatus(Ball::Status::JUMPING);
+		jump_triggered = false;
+	}
+
+	if (crouch_triggered) {
+		ball->SetStatus(Ball::Status::CROUCHING);
+		crouch_triggered = false;
+	}
+
+	ball->Animate(elapsed);
 
 	//reset button press counters:
 	left.downs = 0;

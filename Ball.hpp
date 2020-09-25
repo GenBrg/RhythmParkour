@@ -8,6 +8,12 @@ public:
     inline static constexpr float kNormalRadius { 0.5f };
     inline static constexpr float kCrouchRadius { 0.25f };
 
+    enum class Status : uint8_t {
+        ROLLING = 0,
+        JUMPING,
+        CROUCHING
+    };
+
 private:
     Scene::Transform translation_transform_;
     Scene::Transform rotation_transform_;
@@ -16,11 +22,7 @@ private:
 
     float verticle_speed_;
 
-    enum class Status : uint8_t {
-        ROLLING = 0,
-        JUMPING,
-        CROUCHING
-    } status_;
+    Status status_;
 
 public:
     Ball(PlayMode* playmode);
