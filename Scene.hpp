@@ -11,6 +11,7 @@
  */
 
 #include "GL.hpp"
+#include "Mesh.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -59,11 +60,7 @@ struct Scene {
 			GLuint program = 0; //shader program; passed to glUseProgram
 
 			//attributes:
-			GLuint vao = 0; //attrib->buffer mapping; passed to glBindVertexArray
-
-			GLenum type = GL_TRIANGLES; //what sort of primitive to draw; passed to glDrawArrays
-			GLuint start = 0; //first vertex to draw; passed to glDrawArrays
-			GLuint count = 0; //number of vertices to draw; passed to glDrawArrays
+			const Mesh* mesh = nullptr;
 
 			//uniforms:
 			GLuint OBJECT_TO_CLIP_mat4 = -1U; //uniform location for object to clip space matrix
@@ -79,6 +76,8 @@ struct Scene {
 				GLenum target = GL_TEXTURE_2D;
 			} textures[TextureCount];
 		} pipeline;
+
+		void Draw(glm::mat4 const &world_to_clip, glm::mat4x3 const &world_to_light) const;
 	};
 
 	struct Camera {
