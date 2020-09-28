@@ -1,6 +1,6 @@
 #pragma once
 
-#include <deque>
+#include <set>
 #include <chrono>
 #include <functional>
 
@@ -18,14 +18,18 @@ public:
         callback_();
     }
 
-    bool IsExpired() {
+    bool IsExpired() const {
         return std::chrono::high_resolution_clock::now() >= expire_time_;
     }
+
+    std::chrono::high_resolution_clock::time_point GetExpireTime() const { return expire_time_; }
 };
+
+bool operator<(const Timer& lhs, const Timer& rhs);
 
 class TimerManager {
 private:
-    std::deque<Timer> timers_;
+    std::set<Timer> timers_;
     
 public:
     TimerManager() {}

@@ -36,12 +36,15 @@ private:
     std::deque<Platform> platforms_;
     Scene::Transform main_transform_;
     size_t cur_platform_idx_ { 0 };
+    bool start_moving_ { false };
     
 public:
-    PlatformManager(const std::string& filename);
+    PlatformManager();
     ~PlatformManager() {}
 
     void AddPlatform(Platform::Type type);
     void Update(float elapsed);
     void Draw(Scene& scene) const;
+    void StartMoving() { start_moving_ = true; }
+    static float GetPlatformTime(int platform_idx);
 };

@@ -1,8 +1,8 @@
 #include "Platform.hpp"
 #include "LitColorTextureProgram.hpp"
 #include "Load.hpp"
-#include "common_consts.hpp"
 #include "Ball.hpp"
+#include "common_consts.hpp"
 
 #include <stdexcept>
 #include <iostream>
@@ -70,6 +70,10 @@ drawable_(&transform_)
 
 void PlatformManager::Update(float elapsed)
 {
+    if (!start_moving_) {
+        return;
+    }
+
     while (true) {
         if (cur_platform_idx_ >= platforms_.size()) {
             return;
@@ -109,28 +113,8 @@ void PlatformManager::Draw(Scene& scene) const
     }
 }
 
-PlatformManager::PlatformManager(const std::string& filename)
+PlatformManager::PlatformManager()
 {
-    std::ifstream f(filename);
-    if (!f.is_open()) {
-        throw std::runtime_error("Can not open map file");
-    }
-
-    int last_repeat_num = 0;
-    int repeat_until;
-    int type;
-
-    while (f >> repeat_until >> type) {
-        int to_repeat = repeat_until - last_repeat_num;
-        if (to_repeat <= 0) {
-            throw std::runtime_error("Wrong format of map file!");
-        }
-        last_repeat_num = repeat_until;
-        while (to_repeat--) {
-            AddPlatform(static_cast<Platform::Type>(type));
-        }
-    }
-
     main_transform_.position[1] = -Platform::kPlatformUnitLen;
     main_transform_.position[2] = -Ball::kNormalRadius - (Platform::kPlatformUnitLen / 2.0f);
 }
@@ -158,4 +142,9 @@ float Platform::GetPlatformDist(const Platform* next_platform) const
     }
 
     throw std::runtime_error("Unsupported type");
+}
+
+float PlatformManager::GetPlatformTime(int platform_idx)
+{ 
+     return platform_idx * kBeatInterval * kBeatPerPlatform; 
 }

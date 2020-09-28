@@ -115,6 +115,8 @@ COMMON_NAMES =
 	Timer
 	Particle
 	Platform
+	Judge
+	Overlay
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory

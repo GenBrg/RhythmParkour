@@ -7,10 +7,14 @@
 #include "Load.hpp"
 #include "gl_errors.hpp"
 #include "data_path.hpp"
+#include "Judge.hpp"
+#include "common_consts.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <random>
+#include <stdexcept>
+#include <fstream>
 
 Load< MeshBuffer > rhythm_parkour_meshes(LoadTagDefault, []() -> MeshBuffer const * {
 	MeshBuffer *ret = new MeshBuffer(data_path("rhythm_parkour.pnct"));
@@ -37,9 +41,37 @@ Load< Sound::Sample > rhythm_parkour_sample(LoadTagDefault, []() -> Sound::Sampl
 
 PlayMode::PlayMode() : 
 scene(*rhythm_parkour_scene),
-platform_manager(data_path("rhythm_parkour.map"))
+overlay(this),
+judge(this)
 {
 	ball = new Ball(this);
+
+	// load map
+	std::ifstream f(data_path("rhythm_parkour.map"));
+    if (!f.is_open()) {
+        throw std::runtime_error("Can not open map file");
+    }
+
+    int last_repeat_num = 0;
+    int repeat_until;
+    int type;
+
+    while (f >> repeat_until >> type) {
+        int to_repeat = repeat_until - last_repeat_num;
+        if (to_repeat <= 0) {
+            throw std::runtime_error("Wrong format of map file!");
+        }
+        
+        while (to_repeat--) {
+            platform_manager.AddPlatform(static_cast<Platform::Type>(type));
+        }
+
+		if (type == static_cast<int>(Platform::Type::OBSTACLE)) {
+			judge.AddBeat(PlatformManager::GetPlatformTime(last_repeat_num));
+		}
+
+		last_repeat_num = repeat_until;
+    }
 
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
@@ -48,6 +80,15 @@ platform_manager(data_path("rhythm_parkour.map"))
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
 	background_music = Sound::play(*rhythm_parkour_sample, 0.0f, 10.0f);
+	judge.StartTimer();
+	platform_manager.StartMoving();
+	overlay.AddText("Help", "Jump: Space Camera: Mouse", glm::vec3(0.1f, 0.1f, 0.0f));
+	overlay.AddText("3", "3", glm::vec3(10.0f, 10.0f, 0.0f), 7000, 7500, kOrangeColor);
+	overlay.AddText("2", "2", glm::vec3(10.0f, 10.0f, 0.0f), 7500, 8000, kOrangeColor);
+	overlay.AddText("1", "1", glm::vec3(10.0f, 10.0f, 0.0f), 8000, 8500, kOrangeColor);
+	timer_manager.AddTimer(79000, [&](){
+		judge.AddFinalScoreText();
+	});
 }
 
 PlayMode::~PlayMode() {
@@ -59,19 +100,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		if (evt.key.keysym.sym == SDLK_ESCAPE) {
 			SDL_SetRelativeMouseMode(SDL_FALSE);
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_a) {
-			left.downs += 1;
-			left.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.downs += 1;
-			right.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.downs += 1;
-			up.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+		} if (evt.key.keysym.sym == SDLK_SPACE) {
 			if (!jump.pressed) {
 				jump_triggered = true;
 			}
@@ -87,19 +116,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		}
 	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_a) {
-			left.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+		if (evt.key.keysym.sym == SDLK_SPACE) {
 			jump.pressed = false;
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_LCTRL) {
@@ -113,14 +130,10 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		}
 	} else if (evt.type == SDL_MOUSEMOTION) {
 		if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
-			glm::vec2 motion = glm::vec2(
-				evt.motion.xrel / float(window_size.y),
-				-evt.motion.yrel / float(window_size.y)
-			);
+			float motion = -evt.motion.yrel / float(window_size.y);
 			camera->transform->rotation = glm::normalize(
 				camera->transform->rotation
-				* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
-				* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
+				* glm::angleAxis(motion * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
 			);
 			return true;
 		}
@@ -132,28 +145,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 void PlayMode::update(float elapsed) {
 	timer_manager.Update();
 	platform_manager.Update(elapsed);
-
-	//move camera:
-	{
-
-		//combine inputs into a move:
-		constexpr float PlayerSpeed = 30.0f;
-		glm::vec2 move = glm::vec2(0.0f);
-		if (left.pressed && !right.pressed) move.x =-1.0f;
-		if (!left.pressed && right.pressed) move.x = 1.0f;
-		if (down.pressed && !up.pressed) move.y =-1.0f;
-		if (!down.pressed && up.pressed) move.y = 1.0f;
-
-		//make it so that moving diagonally doesn't go faster:
-		if (move != glm::vec2(0.0f)) move = glm::normalize(move) * PlayerSpeed * elapsed;
-
-		glm::mat4x3 frame = camera->transform->make_local_to_parent();
-		glm::vec3 right = frame[0];
-		//glm::vec3 up = frame[1];
-		glm::vec3 forward = -frame[2];
-
-		camera->transform->position += move.x * right + move.y * forward;
-	}
+	judge.Update(jump_triggered);
 
 	{ //update listener to camera position:
 		glm::mat4x3 frame = camera->transform->make_local_to_parent();
@@ -210,22 +202,9 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	{ //use DrawLines to overlay some text:
 		glDisable(GL_DEPTH_TEST);
 		float aspect = float(drawable_size.x) / float(drawable_size.y);
-		DrawLines lines(glm::mat4(
-			1.0f / aspect, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f
-		));
-
-		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
 		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+
+		judge.AddScoreText();
+		overlay.Draw(aspect, ofs);
 	}
 }

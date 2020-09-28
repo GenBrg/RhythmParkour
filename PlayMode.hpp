@@ -5,6 +5,8 @@
 #include "Ball.hpp"
 #include "Timer.hpp"
 #include "Platform.hpp"
+#include "Overlay.hpp"
+#include "Judge.hpp"
 
 #include <glm/glm.hpp>
 
@@ -38,6 +40,8 @@ struct PlayMode : Mode {
 
 	TimerManager timer_manager;
 	PlatformManager platform_manager;
+	Overlay overlay;
+	Judge judge;
 
 	//music coming from the tip of the leg (as a demonstration):
 	std::shared_ptr< Sound::PlayingSample > background_music;
