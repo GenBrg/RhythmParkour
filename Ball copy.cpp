@@ -3,15 +3,10 @@
 #include "Load.hpp"
 #include "LitColorTextureProgram.hpp"
 #include "common_consts.hpp"
-#include "Platform.hpp"
 
 #include <iostream>
 
 extern Load< MeshBuffer > rhythm_parkour_meshes;
-
-static constexpr float kRollingRotationSpeed = kRollingTranslationSpeed / Ball::kNormalRadius;
-
-static constexpr float kJumpInitialSpeed = Platform::kPlatformUnitLen * (-kGravity) / (kRollingTranslationSpeed);
 
 Ball::Ball(PlayMode* playmode) : 
 drawable_(&rotation_transform_),
@@ -34,7 +29,7 @@ void Ball::SetStatus(Status status)
             drawable_.pipeline.mesh = &(rhythm_parkour_meshes->lookup("PlayerCrouch"));
             playmode_->timer_manager.AddTimer(static_cast<long long>(1000.0f * (2 * kBeatInterval * kBeatPerPlatform)), [&]() {
                 status_ = Status::ROLLING;
-                translation_transform_.position[2] = 0.0f;
+                translation_transform_.position[2] = 0;
                 drawable_.pipeline.mesh = &(rhythm_parkour_meshes->lookup("Player"));
             });
         }
@@ -56,9 +51,4 @@ void Ball::Animate(float elapsed)
             verticle_speed_ = 0.0f;
         }
     }
-}
-
-void Ball::Draw(Scene& scene) const
-{
-    scene.dynamic_drawables.emplace_back(drawable_);
 }

@@ -324,11 +324,9 @@ void Scene::Drawable::Draw(glm::mat4 const &world_to_clip, glm::mat4x3 const &wo
 	
 	//skip any drawables that don't reference any vertex array:
 	if (pipeline.mesh->mesh_buffer->vao == 0) return;
-	
+
 	//skip any drawables that don't contain any vertices:
 	if (pipeline.mesh->count == 0) return;
-
-	
 
 	//Set shader program:
 	glUseProgram(pipeline.program);

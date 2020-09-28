@@ -114,6 +114,7 @@ COMMON_NAMES =
 	Ball
 	Timer
 	Particle
+	Platform
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory

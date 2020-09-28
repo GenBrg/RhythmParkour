@@ -4,6 +4,7 @@
 #include "Sound.hpp"
 #include "Ball.hpp"
 #include "Timer.hpp"
+#include "Platform.hpp"
 
 #include <glm/glm.hpp>
 
@@ -36,6 +37,7 @@ struct PlayMode : Mode {
 	Ball* ball;
 
 	TimerManager timer_manager;
+	PlatformManager platform_manager;
 
 	//music coming from the tip of the leg (as a demonstration):
 	std::shared_ptr< Sound::PlayingSample > background_music;

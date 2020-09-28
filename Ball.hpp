@@ -27,7 +27,7 @@ private:
 public:
     Ball(PlayMode* playmode);
 
-    Scene::Drawable GetDrawable() const { return drawable_; }
+    void Draw(Scene& scene) const;
     void SetStatus(Status status);
     void Animate(float elapsed_time);
 };

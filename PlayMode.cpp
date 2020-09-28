@@ -36,7 +36,8 @@ Load< Sound::Sample > rhythm_parkour_sample(LoadTagDefault, []() -> Sound::Sampl
 });
 
 PlayMode::PlayMode() : 
-scene(*rhythm_parkour_scene)
+scene(*rhythm_parkour_scene),
+platform_manager("")
 {
 	ball = new Ball(this);
 
@@ -44,9 +45,14 @@ scene(*rhythm_parkour_scene)
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
 
+	platform_manager.AddPlatform(Platform::Type::PLAIN);
+	platform_manager.AddPlatform(Platform::Type::SLOPE_DOWN);
+	platform_manager.AddPlatform(Platform::Type::SLOPE_DOWN);
+	platform_manager.AddPlatform(Platform::Type::PLAIN);
+
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
+	// background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
 }
 
 PlayMode::~PlayMode() {
@@ -54,7 +60,6 @@ PlayMode::~PlayMode() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
-
 	if (evt.type == SDL_KEYDOWN) {
 		if (evt.key.keysym.sym == SDLK_ESCAPE) {
 			SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -131,6 +136,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void PlayMode::update(float elapsed) {
 	timer_manager.Update();
+	platform_manager.Update(elapsed);
 
 	//move camera:
 	{
@@ -202,7 +208,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
-	scene.dynamic_drawables.emplace_back(ball->GetDrawable());
+	platform_manager.Draw(scene);
+	ball->Draw(scene);
 	scene.draw(*camera);
 
 	{ //use DrawLines to overlay some text:
