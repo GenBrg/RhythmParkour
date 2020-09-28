@@ -1,8 +1,8 @@
-# (TODO: your game's title)
+# Rhythm Parkour
 
-Author: (TODO: your name)
+Author: Jiasheng Zhou \<jiashen2@andrew.cmu.edu\>
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: In this game, you control a ball to jump over obstacles with the rhythm of the background music. Get as many score as possible by jump with the beats!
 
 Screen Shot:
 
@@ -10,9 +10,12 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+Control:\
+Space: Jump\
+Mouse: Camera Movement
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources:
+
 
 This game was built with [NEST](NEST.md).
 
