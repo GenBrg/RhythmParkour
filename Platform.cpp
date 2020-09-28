@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <fstream>
 
 extern Load< MeshBuffer > rhythm_parkour_meshes;
 
@@ -110,6 +111,17 @@ void PlatformManager::Draw(Scene& scene) const
 
 PlatformManager::PlatformManager(const std::string& filename)
 {
+    std::ifstream f(filename);
+    if (!f.is_open()) {
+        throw std::runtime_error("Can not open map file");
+    }
+
+    char c;
+
+    while (f >> c) {
+        AddPlatform(static_cast<Platform::Type>(c - '0'));
+    }
+
     main_transform_.position[1] = -Platform::kPlatformUnitLen;
     main_transform_.position[2] = -Ball::kNormalRadius - (Platform::kPlatformUnitLen / 2.0f);
 }

@@ -37,7 +37,7 @@ Load< Sound::Sample > rhythm_parkour_sample(LoadTagDefault, []() -> Sound::Sampl
 
 PlayMode::PlayMode() : 
 scene(*rhythm_parkour_scene),
-platform_manager("")
+platform_manager(data_path("rhythm_parkour.map"))
 {
 	ball = new Ball(this);
 
@@ -45,14 +45,9 @@ platform_manager("")
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
 
-	platform_manager.AddPlatform(Platform::Type::PLAIN);
-	platform_manager.AddPlatform(Platform::Type::SLOPE_DOWN);
-	platform_manager.AddPlatform(Platform::Type::SLOPE_DOWN);
-	platform_manager.AddPlatform(Platform::Type::PLAIN);
-
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	// background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
+	background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
 }
 
 PlayMode::~PlayMode() {

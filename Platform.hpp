@@ -28,7 +28,7 @@ public:
     void Draw(Scene& scene) const;
     float GetPlatformDist(const Platform* next_platform) const;
     glm::vec3 GetWorldPos() const { return transform_.make_local_to_world()[3]; }
-    glm::vec3 GetSpeedVec() const {return speed_vec_; };
+    glm::vec3 GetSpeedVec() const { return speed_vec_; };
 };
 
 class PlatformManager {
