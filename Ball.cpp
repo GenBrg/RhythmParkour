@@ -4,6 +4,7 @@
 #include "LitColorTextureProgram.hpp"
 #include "common_consts.hpp"
 #include "Platform.hpp"
+#include "data_path.hpp"
 
 #include <iostream>
 
@@ -12,6 +13,10 @@ extern Load< MeshBuffer > rhythm_parkour_meshes;
 static constexpr float kRollingRotationSpeed = kRollingTranslationSpeed / Ball::kNormalRadius;
 
 static constexpr float kJumpInitialSpeed = (0.7f * Platform::kPlatformUnitLen) * (-kGravity) / (kRollingTranslationSpeed);
+
+Load< Sound::Sample > jump_sfx_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("JumpSound.wav"));
+});
 
 Ball::Ball(PlayMode* playmode) : 
 drawable_(&rotation_transform_),
@@ -28,6 +33,7 @@ void Ball::SetStatus(Status status)
     if (status_ == Status::ROLLING) {
         status_ = status;
         if (status_ == Status::JUMPING) {
+            Sound::play(*jump_sfx_sample, 0.0f, 10.0f);
             verticle_speed_ = kJumpInitialSpeed;
         } else if (status_ == Status::CROUCHING) {
             translation_transform_.position[2] = kCrouchRadius - kNormalRadius;
