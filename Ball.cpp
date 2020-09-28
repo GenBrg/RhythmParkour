@@ -11,7 +11,7 @@ extern Load< MeshBuffer > rhythm_parkour_meshes;
 
 static constexpr float kRollingRotationSpeed = kRollingTranslationSpeed / Ball::kNormalRadius;
 
-static constexpr float kJumpInitialSpeed = Platform::kPlatformUnitLen * (-kGravity) / (kRollingTranslationSpeed);
+static constexpr float kJumpInitialSpeed = (0.7f * Platform::kPlatformUnitLen) * (-kGravity) / (kRollingTranslationSpeed);
 
 Ball::Ball(PlayMode* playmode) : 
 drawable_(&rotation_transform_),

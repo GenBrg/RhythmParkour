@@ -116,10 +116,19 @@ PlatformManager::PlatformManager(const std::string& filename)
         throw std::runtime_error("Can not open map file");
     }
 
-    char c;
+    int last_repeat_num = 0;
+    int repeat_until;
+    int type;
 
-    while (f >> c) {
-        AddPlatform(static_cast<Platform::Type>(c - '0'));
+    while (f >> repeat_until >> type) {
+        int to_repeat = repeat_until - last_repeat_num;
+        if (to_repeat <= 0) {
+            throw std::runtime_error("Wrong format of map file!");
+        }
+        last_repeat_num = repeat_until;
+        while (to_repeat--) {
+            AddPlatform(static_cast<Platform::Type>(type));
+        }
     }
 
     main_transform_.position[1] = -Platform::kPlatformUnitLen;

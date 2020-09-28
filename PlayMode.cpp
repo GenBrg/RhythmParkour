@@ -47,7 +47,7 @@ platform_manager(data_path("rhythm_parkour.map"))
 
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	background_music = Sound::loop(*rhythm_parkour_sample, 0.0f, 10.0f);
+	background_music = Sound::play(*rhythm_parkour_sample, 0.0f, 10.0f);
 }
 
 PlayMode::~PlayMode() {
