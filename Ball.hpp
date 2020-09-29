@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.hpp"
+#include "Particle.hpp"
 
 struct PlayMode;
 
@@ -19,6 +20,7 @@ private:
     Scene::Transform rotation_transform_;
     Scene::Drawable drawable_;
     PlayMode* playmode_;
+    ParticleSystem particle_system_;
 
     float verticle_speed_;
 
@@ -29,5 +31,6 @@ public:
 
     void Draw(Scene& scene) const;
     void SetStatus(Status status);
-    void Animate(float elapsed_time);
+    void Animate(float elapsed);
+    void Update(float elapsed);
 };

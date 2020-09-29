@@ -47,4 +47,5 @@ public:
     void Draw(Scene& scene) const;
     void StartMoving() { start_moving_ = true; }
     static float GetPlatformTime(int platform_idx);
+    const Scene::Transform* GetMainTransform() const { return &main_transform_; } 
 };

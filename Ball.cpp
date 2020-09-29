@@ -21,7 +21,8 @@ Load< Sound::Sample > jump_sfx_sample(LoadTagDefault, []() -> Sound::Sample cons
 Ball::Ball(PlayMode* playmode) : 
 drawable_(&rotation_transform_),
 verticle_speed_(0.0f),
-playmode_(playmode)
+playmode_(playmode),
+particle_system_(playmode->platform_manager.GetMainTransform())
 {
     rotation_transform_.parent = &translation_transform_;
     drawable_.pipeline = lit_color_texture_program_pipeline;
@@ -66,5 +67,12 @@ void Ball::Animate(float elapsed)
 
 void Ball::Draw(Scene& scene) const
 {
+    particle_system_.Draw(scene);
     scene.dynamic_drawables.emplace_back(drawable_);
+}
+
+void Ball::Update(float elapsed)
+{
+    particle_system_.Update(elapsed, glm::vec3(0.0f, -Ball::kNormalRadius, 0.0f) + translation_transform_.position);
+    Animate(elapsed);
 }

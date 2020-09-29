@@ -28,7 +28,7 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up, jump, crouch;
+	} jump, crouch;
 
 	bool jump_triggered { false };
 	bool crouch_triggered { false };

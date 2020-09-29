@@ -164,13 +164,7 @@ void PlayMode::update(float elapsed) {
 		crouch_triggered = false;
 	}
 
-	ball->Animate(elapsed);
-
-	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
+	ball->Update(elapsed);
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
