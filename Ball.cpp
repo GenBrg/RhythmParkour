@@ -22,7 +22,8 @@ Ball::Ball(PlayMode* playmode) :
 drawable_(&rotation_transform_),
 playmode_(playmode),
 particle_system_(playmode->platform_manager.GetMainTransform()),
-verticle_speed_(0.0f)
+verticle_speed_(0.0f),
+status_(Status::ROLLING)
 {
     rotation_transform_.parent = &translation_transform_;
     drawable_.pipeline = lit_color_texture_program_pipeline;
