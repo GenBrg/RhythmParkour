@@ -28,8 +28,8 @@ void PlatformManager::AddPlatform(Platform::Type type)
 }
 
 Platform::Platform(Type type, Scene::Transform* main_transform, const Platform* last_platform) :
-type_(type),
-drawable_(&transform_)
+drawable_(&transform_),
+type_(type)
 {
     drawable_.pipeline = lit_color_texture_program_pipeline;
     drawable_.pipeline.mesh = &(rhythm_parkour_meshes->lookup(kMeshNames[static_cast<uint8_t>(type)]));
@@ -65,6 +65,7 @@ drawable_(&transform_)
         speed_vec_[1] = -kRollingTranslationSpeed;
         speed_vec_[2] = kRollingTranslationSpeed;
         break;
+        default: ;
     }
 }
 

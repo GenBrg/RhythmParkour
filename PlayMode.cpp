@@ -83,9 +83,9 @@ judge(this)
 	judge.StartTimer();
 	platform_manager.StartMoving();
 	overlay.AddText("Help", "Jump: Space Camera: Mouse", glm::vec3(0.1f, 0.1f, 0.0f));
-	overlay.AddText("3", "3", glm::vec3(10.0f, 10.0f, 0.0f), 7000, 7500, kOrangeColor);
-	overlay.AddText("2", "2", glm::vec3(10.0f, 10.0f, 0.0f), 7500, 8000, kOrangeColor);
-	overlay.AddText("1", "1", glm::vec3(10.0f, 10.0f, 0.0f), 8000, 8500, kOrangeColor);
+	overlay.AddText("3", "3", glm::vec3(10.0f, 10.0f, 0.0f), 8500, 9000, kOrangeColor);
+	overlay.AddText("2", "2", glm::vec3(10.0f, 10.0f, 0.0f), 9000, 9500, kOrangeColor);
+	overlay.AddText("1", "1", glm::vec3(10.0f, 10.0f, 0.0f), 9500, 10000, kOrangeColor);
 	timer_manager.AddTimer(79000, [&](){
 		judge.AddFinalScoreText();
 	});

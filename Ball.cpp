@@ -20,9 +20,9 @@ Load< Sound::Sample > jump_sfx_sample(LoadTagDefault, []() -> Sound::Sample cons
 
 Ball::Ball(PlayMode* playmode) : 
 drawable_(&rotation_transform_),
-verticle_speed_(0.0f),
 playmode_(playmode),
-particle_system_(playmode->platform_manager.GetMainTransform())
+particle_system_(playmode->platform_manager.GetMainTransform()),
+verticle_speed_(0.0f)
 {
     rotation_transform_.parent = &translation_transform_;
     drawable_.pipeline = lit_color_texture_program_pipeline;
